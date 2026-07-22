@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Vault</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a24;
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --text-dim: #8888a0;
+    --accent: #c9a96e;
+    --accent-dim: #8a7a5a;
+    --danger: #c95a5a;
+    --success: #5ac98a;
+    --warning: #c9a96e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    padding: 16px;
+  }
+  .vault { width: 100%; max-width: 420px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  h1 {
+    font-size: 1.3rem;
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  .streak {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--accent-dim);
+    margin-bottom: 20px;
+  }
+  .streak strong { color: var(--accent); font-size: 1.1rem; }
+  input, textarea {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+    margin-bottom: 12px;
+    font-family: 'Georgia', serif;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { min-height: 60px; resize: none; font-family: monospace; }
+  button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+    font-family: 'Georgia', serif;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: bold;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-success { background: var(--success); color: var(--bg); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .countdown {
+    text-align: center;
+    font-size: 2.5rem;
+    font-family: 'Courier New', monospace;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin: 20px 0;
+  }
+  .countdown-label {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+  .quote-box {
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 0 10px 10px 0;
+  }
+  .quote-text {
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  .quote-source {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    margin-top: 8px;
+    text-align: right;
+  }
+  .oath-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 12px;
+    background: var(--surface-2);
+    border-radius: 10px;
+  }
+  .oath-check input {
+    width: auto;
+    margin: 2px 0 0 0;
+    accent-color: var(--accent);
+  }
+  .oath-check label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .password-reveal {
+    background: var(--surface-2);
+    border: 2px dashed var(--accent);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin: 16px 0;
+  }
+  .password-text {
+    font-family: 'Courier New', monospace;
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    word-break: break-all;
+  }
+  .burn-timer {
+    text-align: center;
+    color: var(--danger);
+    font-size: 0.9rem;
+    margin-top: 8px;
+    font-family: 'Courier New', monospace;
+  }
+  .hidden { display: none !important; }
+  .fade-in {
+    animation: fadeIn 0.5s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .numpad button {
+    padding: 18px;
+    font-size: 1.3rem;
+    margin: 0;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-family: 'Georgia', serif;
+  }
+  .numpad button:hover { background: var(--border); }
+  .pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    transition: all 0.2s;
+  }
+  .pin-dot.filled { background: var(--accent); }
+  .status-msg {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin: 12px 0;
+  }
+  .window-alert {
+    background: var(--warning);
+    color: var(--bg);
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    font-weight: bold;
+  }
+  .return-time {
+    text-align: center;
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: 12px;
+    font-family: 'Courier New', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="vault" id="vault">
+  <!-- PIN Screen -->
+  <div class="card" id="pinScreen">
+    <h1>THE VAULT</h1>
+    <div class="subtitle">Guard what guards you</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="numpad">
+      <button onclick="enterPin(1)">1</button><button onclick="enterPin(2)">2</button><button onclick="enterPin(3)">3</button>
+      <button onclick="enterPin(4)">4</button><button onclick="enterPin(5)">5</button><button onclick="enterPin(6)">6</button>
+      <button onclick="enterPin(7)">7</button><button onclick="enterPin(8)">8</button><button onclick="enterPin(9)">9</button>
+      <button onclick="clearPin()">⌫</button><button onclick="enterPin(0)">0</button><button onclick="submitPin()">→</button>
+    </div>
+    <div class="status-msg" id="pinStatus"></div>
+  </div>
+
+  <!-- Main Vault Screen -->
+  <div class="card hidden" id="mainScreen">
+    <h1>THE VAULT</h1>
+    <div class="streak" id="streakDisplay">🔥 Streak: <strong>0</strong> days</div>
+    
+    <!-- State: No password stored -->
+    <div id="storeState">
+      <div class="subtitle">Store your password once. It will never be visible again without the full ritual.</div>
+      <textarea id="passwordInput" placeholder="Paste your 20-character password here..."></textarea>
+      <button class="btn-primary" onclick="storePassword()">Seal the Vault</button>
+    </div>
+
+    <!-- State: Password stored, no request active -->
+    <div id="idleState" class="hidden">
+      <div class="subtitle">Your password is sealed. The lock is strong.</div>
+      <button class="btn-primary" onclick="startRequestFlow()">Request Password</button>
+    </div>
+
+    <!-- State: Request pending (during 20h wait) -->
+    <div id="pendingState" class="hidden">
+      <div class="countdown-label">Time remaining until you may retrieve:</div>
+      <div class="countdown" id="countdown">20:00:00</div>
+      <div class="quote-box">
+        <div class="quote-text" id="pendingQuote"></div>
+        <div class="quote-source" id="pendingSource"></div>
+      </div>
+      <button class="btn-danger" onclick="cancelRequest()">Cancel Request — Choose Strength</button>
+      <div class="return-time" id="returnTime"></div>
+    </div>
+
+    <!-- State: Retrieval window active -->
+    <div id="windowState" class="hidden">
+      <div class="window-alert">⏰ Retrieval window is open. You have 30 minutes.</div>
+      <button class="btn-primary" onclick="startRetrievalFlow()">Retrieve Password</button>
+    </div>
+
+    <!-- State: Password revealed -->
+    <div id="revealedState" class="hidden">
+      <div class="password-reveal">
+        <div class="password-text" id="revealedPassword"></div>
+        <div class="burn-timer" id="burnTimer">This will self-destruct in 10:00</div>
+      </div>
+      <button class="btn-success" onclick="burnNow()">I am done — Destroy Now</button>
+    </div>
+  </div>
+  
+    <!-- Oath Modal (Request) -->
+  <div class="card hidden" id="requestOathModal">
+    <h1>The First Gate</h1>
+    <div class="quote-box">
+      <div class="quote-text" id="requestQuote"></div>
+      <div class="quote-source" id="requestSource"></div>
+    </div>
+    <div class="oath-check">
+      <input type="checkbox" id="requestOathCheck" onchange="updateRequestBtn()">
+      <label>I am requesting this for a legitimate need — to protect a new app, a new boundary. Not in a moment of weakness. I understand 20 hours stand between me and this password.</label>
+    </div>
+    <button class="btn-primary" onclick="confirmRequest()" id="requestConfirmBtn" disabled>Begin the 20 Hours</button>
+    <button class="btn-ghost" onclick="backToMain()">Go Back</button>
+  </div>
+
+  <!-- Oath Modal (Retrieval) -->
+  <div class="card hidden" id="retrievalOathModal">
+    <h1>The Second Gate</h1>
+    <div class="quote-box">
+      <div class="quote-text" id="retrievalQuote"></div>
+      <div class="quote-source" id="retrievalSource"></div>
+    </div>
+    <div class="oath-check">
+      <input type="checkbox" id="retrievalOathCheck" onchange="updateRetrievalBtn()">
+      <label>I have waited 20 hours. I am calm. I am in control. I need this password for a specific, legitimate purpose, and I will use it immediately and destroy it.</label>
+    </div>
+    <button class="btn-primary" onclick="confirmRetrieval()" id="retrievalConfirmBtn" disabled>Reveal Password</button>
+    <button class="btn-ghost" onclick="backToMain()">Go Back</button>
+  </div>
+</div>
+
+<script>
+  // ===== QUOTES =====
+  const QUOTES = [
+    { text: "And as for those who strive in Our path — We will surely guide them to Our ways. And indeed, Allah is with the doers of good.", source: "Quran 29:69" },
+    { text: "The strong person is not the one who wrestles others, but the one who controls himself when angry.", source: "Hadith — Bukhari" },
+    { text: "Between stimulus and response there is a space. In that space is our power to choose our response. In our response lies our growth and our freedom.", source: "Viktor Frankl" },
+    { text: "He who conquers himself is the mightiest warrior.", source: "Confucius" },
+    { text: "Tell the believing men to lower their gaze and guard their private parts. That is purer for them. Indeed, Allah is Acquainted with what they do.", source: "Quran 24:30" },
+    { text: "The mind is its own place, and in itself can make a heaven of hell, a hell of heaven.", source: "John Milton" },
+    { text: "Whoever guarantees me what is between his jaws and what is between his legs, I guarantee him Paradise.", source: "Hadith — Bukhari" },
+    { text: "No man is free who cannot command himself.", source: "Pythagoras" },
+    { text: "Indeed, Allah will not change the condition of a people until they change what is in themselves.", source: "Quran 13:11" },
+    { text: "The soul becomes dyed with the color of its thoughts.", source: "Marcus Aurelius" }
+  ];
+
+  // ===== STATE =====
+  let pin = "";
+  let correctPin = localStorage.getItem("vault_pin") || null;
+  let password = localStorage.getItem("vault_password") || null;
+  let requestTime = localStorage.getItem("vault_requestTime") ? parseInt(localStorage.getItem("vault_requestTime")) : null;
+  let lastRetrieval = localStorage.getItem("vault_lastRetrieval") ? parseInt(localStorage.getItem("vault_lastRetrieval")) : null;
+  let burnTimeout = null;
+  let countdownInterval = null;
+
+  const LOCK_HOURS = 20;
+  const RETRIEVAL_WINDOW_MINUTES = 30;
+  const BURN_MINUTES = 10;
+
+  // ===== INIT =====
+  function init() {
+    if (!correctPin) {
+      document.getElementById("pinStatus").textContent = "Create a 4-digit PIN to secure the vault";
+    } else {
+      document.getElementById("pinStatus").textContent = "Enter your PIN";
+    }
+  }
+
+  // ===== PIN =====
+  function enterPin(n) {
+    if (pin.length < 4) {
+      pin += n;
+      updatePinDots();
+    }
+  }
+  function clearPin() {
+    pin = pin.slice(0, -1);
+    updatePinDots();
+  }
+  function updatePinDots() {
+    const dots = document.querySelectorAll(".pin-dot");
+    dots.forEach(function(d, i) {
+      d.classList.toggle("filled", i < pin.length);
+    });
+  }
+  function submitPin() {
+    if (pin.length !== 4) return;
+    if (!correctPin) {
+      correctPin = pin;
+      localStorage.setItem("vault_pin", correctPin);
+      unlock();
+    } else if (pin === correctPin) {
+      unlock();
+    } else {
+      document.getElementById("pinStatus").textContent = "Wrong PIN. Try again.";
+      pin = "";
+      updatePinDots();
+    }
+  }
+  
+    // ===== MAIN SCREEN =====
+  function unlock() {
+    document.getElementById("pinScreen").classList.add("hidden");
+    document.getElementById("mainScreen").classList.remove("hidden");
+    document.getElementById("mainScreen").classList.add("fade-in");
+    updateStreak();
+    refreshState();
+  }
+
+  function updateStreak() {
+    let days = 0;
+    if (lastRetrieval) {
+      const now = Date.now();
+      const diff = now - lastRetrieval;
+      days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    } else if (password) {
+      const stored = localStorage.getItem("vault_storedTime");
+      if (stored) {
+        days = Math.floor((Date.now() - parseInt(stored)) / (1000 * 60 * 60 * 24));
+      }
+    }
+    document.getElementById("streakDisplay").innerHTML = '🔥 Streak: <strong>' + days + '</strong> day' + (days !== 1 ? 's' : '');
+  }
+
+  function refreshState() {
+    hideAllStates();
+    if (!password) {
+      document.getElementById("storeState").classList.remove("hidden");
+    } else if (!requestTime) {
+      document.getElementById("idleState").classList.remove("hidden");
+    } else {
+      const now = Date.now();
+      const elapsed = now - requestTime;
+      const lockMs = LOCK_HOURS * 60 * 60 * 1000;
+      const windowMs = RETRIEVAL_WINDOW_MINUTES * 60 * 1000;
+
+      if (elapsed < lockMs) {
+        document.getElementById("pendingState").classList.remove("hidden");
+        startCountdown(requestTime + lockMs);
+        showRandomQuote("pendingQuote", "pendingSource");
+        const returnDate = new Date(requestTime + lockMs);
+        document.getElementById("returnTime").textContent = "Return after: " + returnDate.toLocaleString();
+      } else if (elapsed < lockMs + windowMs) {
+        document.getElementById("windowState").classList.remove("hidden");
+      } else {
+        localStorage.removeItem("vault_requestTime");
+        requestTime = null;
+        document.getElementById("idleState").classList.remove("hidden");
+      }
+    }
+  }
+
+  function hideAllStates() {
+    ["storeState","idleState","pendingState","windowState","revealedState"].forEach(function(id) {
+      document.getElementById(id).classList.add("hidden");
+    });
+  }
+
+  // ===== STORE PASSWORD =====
+  function storePassword() {
+    const val = document.getElementById("passwordInput").value.trim();
+    if (!val) return;
+    password = val;
+    localStorage.setItem("vault_password", password);
+    localStorage.setItem("vault_storedTime", Date.now().toString());
+    document.getElementById("passwordInput").value = "";
+    refreshState();
+  }
+
+  // ===== REQUEST FLOW =====
+  function startRequestFlow() {
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("requestOathModal").classList.remove("hidden");
+    document.getElementById("requestOathModal").classList.add("fade-in");
+    showRandomQuote("requestQuote", "requestSource");
+    document.getElementById("requestOathCheck").checked = false;
+    document.getElementById("requestConfirmBtn").disabled = true;
+  }
+
+  function updateRequestBtn() {
+    document.getElementById("requestConfirmBtn").disabled = !document.getElementById("requestOathCheck").checked;
+  }
+
+  function confirmRequest() {
+    if (!document.getElementById("requestOathCheck").checked) return;
+    requestTime = Date.now();
+    localStorage.setItem("vault_requestTime", requestTime.toString());
+    backToMain();
+  }
+
+  function cancelRequest() {
+    if (!confirm("Are you sure? This resets the timer. You are choosing strength.")) return;
+    localStorage.removeItem("vault_requestTime");
+    requestTime = null;
+    if (countdownInterval) clearInterval(countdownInterval);
+    refreshState();
+  }
+  
+    // ===== RETRIEVAL FLOW =====
+  function startRetrievalFlow() {
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("retrievalOathModal").classList.remove("hidden");
+    document.getElementById("retrievalOathModal").classList.add("fade-in");
+    showRandomQuote("retrievalQuote", "retrievalSource");
+    document.getElementById("retrievalOathCheck").checked = false;
+    document.getElementById("retrievalConfirmBtn").disabled = true;
+  }
+
+  function updateRetrievalBtn() {
+    document.getElementById("retrievalConfirmBtn").disabled = !document.getElementById("retrievalOathCheck").checked;
+  }
+
+  function confirmRetrieval() {
+    if (!document.getElementById("retrievalOathCheck").checked) return;
+    backToMain();
+    hideAllStates();
+    document.getElementById("revealedState").classList.remove("hidden");
+    document.getElementById("revealedPassword").textContent = password;
+    startBurnTimer();
+    lastRetrieval = Date.now();
+    localStorage.setItem("vault_lastRetrieval", lastRetrieval.toString());
+    localStorage.removeItem("vault_requestTime");
+    requestTime = null;
+    updateStreak();
+  }
+
+  // ===== BURN TIMER =====
+  function startBurnTimer() {
+    let remaining = BURN_MINUTES * 60;
+    const burnEl = document.getElementById("burnTimer");
+    if (burnTimeout) clearInterval(burnTimeout);
+    burnTimeout = setInterval(function() {
+      remaining--;
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      burnEl.textContent = "This will self-destruct in " + m + ":" + s.toString().padStart(2, '0');
+      if (remaining <= 0) {
+        clearInterval(burnTimeout);
+        burnComplete();
+      }
+    }, 1000);
+  }
+
+  function burnNow() {
+    if (burnTimeout) clearInterval(burnTimeout);
+    burnComplete();
+  }
+
+  function burnComplete() {
+    document.getElementById("revealedPassword").textContent = "••••••••••••••••••••";
+    document.getElementById("burnTimer").textContent = "Gone. The vault is sealed again.";
+    setTimeout(function() {
+      refreshState();
+    }, 2000);
+  }
+
+  // ===== COUNTDOWN =====
+  function startCountdown(targetTime) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(function() {
+      const now = Date.now();
+      const diff = targetTime - now;
+      if (diff <= 0) {
+        clearInterval(countdownInterval);
+        refreshState();
+        return;
+      }
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      document.getElementById("countdown").textContent = 
+        h.toString().padStart(2,'0') + ":" + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
+    }, 1000);
+  }
+  
+    // ===== QUOTES =====
+  function showRandomQuote(textId, sourceId) {
+    const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    document.getElementById(textId).textContent = q.text;
+    document.getElementById(sourceId).textContent = "— " + q.source;
+  }
+
+  // ===== NAVIGATION =====
+  function backToMain() {
+    document.getElementById("requestOathModal").classList.add("hidden");
+    document.getElementById("retrievalOathModal").classList.add("hidden");
+    document.getElementById("mainScreen").classList.remove("hidden");
+    refreshState();
+  }
+
+  // ===== START =====
+  init();
+</script>
+
+</body>
+</html>
+
+  
